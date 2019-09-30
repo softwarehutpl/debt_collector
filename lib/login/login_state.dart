@@ -11,6 +11,8 @@ class InitialLoginState extends LoginState { }
 
 class LoginInProgressState extends LoginState { }
 
+class RedirectToRegisterPageState extends LoginState { }
+
 class LoginResponseState extends LoginState {
   final bool response;
   LoginResponseState(this.response) : super([response]);
