@@ -29,6 +29,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
 
   final loginBloc = LoginBloc();
+  final _userTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +47,10 @@ class _LoginPageState extends State<LoginPage> {
                 return buildLoginResponseState();
               } else if (loginState is LoginInProgressState) {
                 return buildLoginInProgressState();
-              }
-              return buildColumnWithData();
+              } else if (loginState is InitialLoginState) {
+                return buildColumnWithData(context, loginState.usernameErrorMessage, loginState.passwordErrorMessage);
+              }              
+              return Container();
             },
           ),
         ),
@@ -54,52 +58,52 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Column buildColumnWithData() {
+  Column buildColumnWithData(BuildContext context, String userErrorTextMessage, String passwordErrorTextMessage) {
     return Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            StreamBuilder<String>(
-              stream : null,
-              builder: (context, snapshot) => Padding(
-                child: TextField(
-                  onChanged: null,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "Enter Email",
-                      labelText: "Email"
-                  ),
+            Padding(
+              child: TextField(
+                controller: _userTextController,
+                onChanged: (value) {
+                  final loginBloc = BlocProvider.of<LoginBloc>(context);
+                  loginBloc.dispatch(ValidateLoginEvent(_userTextController.text, _passwordTextController.text));
+                },
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                    errorText: userErrorTextMessage,
+                    border: OutlineInputBorder(),
+                    hintText: "Enter Email",
+                    labelText: "Email"
                 ),
-                padding: EdgeInsets.all(10.0),
               ),
+              padding: EdgeInsets.all(10.0),
             ),
-            StreamBuilder<String>(
-              stream: null,
-              builder: (context, snapshot) => Padding(
-                child: TextField(
-                  keyboardType: TextInputType.text,
-                  onChanged: null,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "Enter Password",
-                      labelText: "Password"
-                  ),
+            Padding(
+              child: TextField(
+                keyboardType: TextInputType.text,
+                controller: _passwordTextController,
+                onChanged: (value) {
+                  final loginBloc = BlocProvider.of<LoginBloc>(context);
+                  loginBloc.dispatch(ValidateLoginEvent(_userTextController.text, _passwordTextController.text));
+                },
+                obscureText: true,
+                decoration: InputDecoration(
+                    errorText: passwordErrorTextMessage,
+                    border: OutlineInputBorder(),
+                    hintText: "Enter Password",
+                    labelText: "Password"
                 ),
-                padding: EdgeInsets.all(10.0),
               ),
+              padding: EdgeInsets.all(10.0),
             ),
-            StreamBuilder<bool>(
-              stream: null,
-              builder: (context, snapshot) => RaisedButton(
-                color: Colors.green,
-                onPressed: (snapshot.hasData && snapshot.data == true) ?
-                    () {
-                  //login
-                } : null,
-                child: Text("Submit"),
-              ),
+            RaisedButton(
+              color: Colors.green,
+              onPressed: () {
+                submit(context);
+              },
+              child: Text("Submit"),
             ),
             Padding(
               padding: EdgeInsets.all(20.0),
@@ -125,6 +129,11 @@ class _LoginPageState extends State<LoginPage> {
     return Center(
       child: Text("LOGGED IN"),
     );
+  }
+
+  void submit(BuildContext context) {
+    final loginBloc = BlocProvider.of<LoginBloc>(context);
+    loginBloc.dispatch(SubmitLoginEvent(_userTextController.text, _passwordTextController.text));
   }
 
   @override

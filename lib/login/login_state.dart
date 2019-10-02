@@ -7,7 +7,11 @@ abstract class LoginState extends Equatable {
   LoginState([List props = const[]]) : super(props);
 }
 
-class InitialLoginState extends LoginState { }
+class InitialLoginState extends LoginState {
+  final String usernameErrorMessage;
+  final String passwordErrorMessage;
+  InitialLoginState(this.usernameErrorMessage, this.passwordErrorMessage) : super([usernameErrorMessage, passwordErrorMessage]);
+}
 
 class LoginInProgressState extends LoginState { }
 
